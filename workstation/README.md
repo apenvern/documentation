@@ -149,3 +149,21 @@ sudo docker pull jdubois/jhipster-docker
 mkdir ~/jhipster
 sudo docker run -v ~/jhipster:/jhipster -p 8080:8080 -p 3000:3000 -p 3001:3001 -p 4022:22 -t jdubois/jhipster-docker
 ```
+
+## Sublime Text 3
+
+[rubygems](https://rubygems.org/)
+
+Liste des plugins : 
+
+- [TypeScript](https://packagecontrol.io/packages/TypeScript) : Plugin pour développer en TypeScript
+- [DocBlockr](https://packagecontrol.io/packages/DocBlockr) : Plugin pour la doc (ie JavaDoc)
+- [Emmet](https://packagecontrol.io/packages/Emmet) : Plugin pour Html et Css
+    En cas de problème lors de l'installation sur PyV8 il faut installer les binaires manuellement : [binaires](https://github.com/emmetio/pyv8-binaries). A noter que sur SublimeText 3 il faut coller les binaires dans D:\outils\Sublime Text\Data\\**Installed Packages**\PyV8\pyv8-win64-p3
+- [SideBarEnhancements](https://packagecontrol.io/packages/SideBarEnhancements) : Ajout de nombreux d'élément au menu de la SideBar
+- [Tag](https://github.com/titoBouzout/Tag) : Outil pour du Html
+
+Lien utils : 
+
+- Top 10 des plugin : http://www.smartrock.fr/blog/10-plugins-sublime-text-indispensables/
+
