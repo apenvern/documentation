@@ -4,21 +4,24 @@
 <!-- MarkdownTOC depth=3 -->
 
 - [Informations système](#informations-système)
-    - [OS](#os)
-    - [CPU](#cpu)
-    - [Swap](#swap)
-    - [File System](#file-system)
-    - [User](#user)
-    - [Port](#port)
+  - [OS](#os)
+  - [CPU](#cpu)
+  - [Swap](#swap)
+  - [File System](#file-system)
+  - [User](#user)
+  - [Port](#port)
+  - [Réseau](#réseau)
+  - [Cle ssh](#cle-ssh)
 - [Les commandes unix](#les-commandes-unix)
-    - [find](#find)
-    - [tar](#tar)
-    - [sed](#sed)
-    - [nohup](#nohup)
-    - [scp | lftp](#scp-|-lftp)
-    - [md5 | checksum | digest](#md5-|-checksum-|-digest)
-    - [ssh](#ssh)
+  - [find](#find)
+  - [tar](#tar)
+  - [sed](#sed)
+  - [nohup](#nohup)
+  - [scp | lftp](#scp-|-lftp)
+  - [md5 | checksum | digest](#md5-|-checksum-|-digest)
+  - [ssh](#ssh)
 - [Tips](#tips)
+- [Liens utiles](#liens-utiles)
 
 <!-- /MarkdownTOC -->
 
@@ -26,8 +29,13 @@
 
 ### OS
 
-```ksh 
+#### Connaitre la distribution Linux et sa version 
+```bash
+[root@machine-01 ~]# cat /etc/redhat-release
+Red Hat Enterprise Linux Server release 5.11 (Tikanga)
+```
 
+```ksh 
 #!/bin/ksh
 # ndd (Solaris)
 for var in $(/usr/sbin/ndd /dev/tcp \? | awk '{print $1}'| grep -v obsolete );do
@@ -98,6 +106,83 @@ ls -l /proc/29962/fd
 
 ```
 
+#### Gestion de la taille disque sur une VM
+
+**Rappels : **
+
+* **Volume physique (PV)** : Un volume physique ou « PV » pour « physical volume » est un disque ou une partition. C'est un
+espace de stockage bien réel (autrement dit un périphérique de la forme /dev/sda2 par exemple), dont
+on va confier la gestion à LVM. 
+* **Groupe de volumes (VG)** : Un groupe de volumes ou « VG » pour « volume group » est, comme son nom l'indique, un ensemble
+de PV. On a donc un ou plusieurs PV dans un groupe de volumes. Pour utiliser LVM, il faut
+obligatoirement au moins un groupe de volumes. 
+* **Volume Logique (LV)** : Un volume logique ou « LV » pour « logical volume » est ce que nous allons utiliser au final. Un volume
+logique est un espace « quelque part dans un VG » où l'on peut mettre un système de fichiers. C'est ce
+qui remplace les partitions. On peut donc utiliser un volume logique pour /home, un autre pour la
+racine, un autre pour mettre la mémoire virtuelle, etc…
+
+```bash 
+
+# Liste les disque disponible
+[root@machine01 ~]# ls /dev/sd*
+/dev/sda  /dev/sda1  /dev/sda2  /dev/sdb  /dev/sdc
+
+# Liste les disques physiques installés
+# A noter la différence entre le ls /dev/ds* et le pvs permet de connaitre le nom du disque à ajouter
+[root@machine01 ~]# pvs
+  PV         VG      Fmt  Attr PSize   PFree
+  /dev/sda2  VGRoot  lvm2 a--   59,88G 7,19G
+  /dev/sdb   vg_gael lvm2 a--  170,00G 4,00G
+
+# Creation du disque physique
+[root@machine01 ~]# pvcreate /dev/sdc
+  Writing physical volume data to disk "/dev/sdc"
+  Physical volume "/dev/sdc" successfully created
+
+# Lister les disques physiques
+[root@machine01 ~]# pvdisplay
+  "/dev/sdc" is a new physical volume of "100,00 GB"
+  --- NEW Physical volume ---
+  PV Name               /dev/sdc
+  VG Name
+  PV Size               100,00 GB
+  Allocatable           NO
+  PE Size (KByte)       0
+  Total PE              0
+  Free PE               0
+  Allocated PE          0
+
+# Creer un groupe virtuel
+[root@machine01 ~]# vgcreate VGRoot /dev/sdc
+
+# Creer un volume logique
+# Cette commande va créer le LV test d’une taille de 10Go sur le VG nommé VGRoot.
+[root@machine01 ~]# lvcreate -L 10G -n test VGRoot
+
+# Lister les groupes virtuel
+[root@machine01 ~]# vgs
+  VG      #PV #LV #SN Attr   VSize   VFree
+  VGRoot    2   7   0 wz--n- 159,84G 107,16G
+  vg_gael   1  11   0 wz--n- 170,00G   4,00G
+
+# Ajout d'un disque physique à un groupe virtuel.
+[root@machine01 ~]# vgextend VGRoot /dev/sdc
+  Volume group "VGRoot" successfully extended
+
+# Agrandir un volume logique 
+[root@machine01 ~]# lvresize -L+100g -n /dev/mapper/VGRoot-appli
+  Extending logical volume appli to 109,75 GB
+  Logical volume appli successfully resized
+
+# Agrandir un volume logique 
+[root@machine01 ~]# resize2fs /dev/mapper/VGRoot-appli
+resize2fs 1.39 (29-May-2006)
+Filesystem at /dev/mapper/VGRoot-appli is mounted on /appli; on-line resizing required
+Performing an on-line resize of /dev/mapper/VGRoot-appli to 28770304 (4k) blocks.
+Le système de fichiers /dev/mapper/VGRoot-appli a maintenant une taille de 28770304 blocs.
+
+```
+
 ### User
 
 ```
@@ -130,6 +215,63 @@ passwd: password successfully changed for syscft
 
 # Trouver le process qui ecoute sur un port
 for i in `ps -eaf | grep java | grep adm | cut -d ' ' -f4`; do pfiles $i | grep 60016 && echo $i; done;
+```
+
+### Réseau
+
+
+```sh
+# Modifier le fichier /etc/hosts
+[root@machine01 ~]$ vi /etc/hosts
+# Do not remove the following line, or various programs
+# that require network functionality will fail.
+127.0.0.1       localhost.localdomain   localhost
+::1     localhost.localdomain   localhost6      localhost
+127.0.0.1       machine01
+```
+
+### Cle ssh
+
+```sh
+
+# Generer un cle ssh
+[root@machine01 ~]$ ssh-keygen -t rsa -C "your_email@youremail.com"
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/test/.ssh/id_rsa):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/test/.ssh/id_rsa.
+Your public key has been saved in /home/test/.ssh/id_rsa.pub.
+The key fingerprint is:
+ac:e4:e4:e4:e4:e4:e4:e4:c6:45:14:c9:8d:7a:a1:09 your_email@youremail.com
+
+# Propager la clee ssh.
+
+# Copier la cle public sur le serveur remote
+[root@machine01 ~]$ scp .ssh/id_rsa.pub login@hostname:.ssh/id_rsa.pub
+The authenticity of host 'hostname' can't be established.
+RSA key fingerprint is ac:e4:e4:e4:e4:e4:e4:e4:c6:45:14:c9:8d:7a:a1:09.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added 'hostname' (RSA) to the list of known hosts.
+login@hostname's password:
+id_rsa.pub                                                                                                              100%  407     0.4KB/s   00:00
+
+# Se connecter sur le serveur remote
+root@machine02 $ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+root@machine02 $ rm ~/.ssh/id_rsa.pub
+root@machine02 $ chmod 660 ~/.ssh/authorized_keys
+root@machine02 $ chmod 700 ~/.ssh
+
+# Ajouter la passphrase à l'agent sur le serveur principale
+# La commande met sur la sortie standard des variables environnement à déclarer et à exporter.
+[root@machine01 ~]$ ssh-agent
+SSH_AUTH_SOCK=/tmp/ssh-cpaWt12729/agent.12729; export SSH_AUTH_SOCK;
+SSH_AGENT_PID=12730; export SSH_AGENT_PID;
+echo Agent pid 12730;
+
+[root@machine01 ~]$ ssh-add
+Enter passphrase for /home/root/.ssh/id_rsa:
+Identity added: /home/root/.ssh/id_rsa (/home/root/.ssh/id_rsa)
 ```
 
 ## Les commandes unix
@@ -233,3 +375,7 @@ for i in `find . -name \*.jar`; do jar tvf $i|grep -qi <MA_CLASSE> && echo $i ; 
 for i in `find . -name \*.jar`; do echo "Jar : $i"; for j in `jar tf $i | grep class | cut -d"." -f1 | sed -e 's/\//./g'` ; do serialver -classpath $i $j| grep fr ; done; done
 ```
 
+## Liens utiles
+
+* Matrice commandes unix par OS : http://www.datadisk.co.uk/html_docs/misc/unix_commands.htm
+* Cle ssh : http://www.linux-france.org/prj/edu/archinet/systeme/ch13s03.html
