@@ -3,25 +3,29 @@
 
 <!-- MarkdownTOC depth=3 -->
 
-- [Informations système](#informations-système)
-  - [OS](#os)
-  - [CPU](#cpu)
-  - [Swap](#swap)
-  - [File System](#file-system)
-  - [User](#user)
-  - [Port](#port)
-  - [Réseau](#réseau)
-  - [Cle ssh](#cle-ssh)
-- [Les commandes unix](#les-commandes-unix)
-  - [find](#find)
-  - [tar](#tar)
-  - [sed](#sed)
-  - [nohup](#nohup)
-  - [scp | lftp](#scp-|-lftp)
-  - [md5 | checksum | digest](#md5-|-checksum-|-digest)
-  - [ssh](#ssh)
-- [Tips](#tips)
-- [Liens utiles](#liens-utiles)
+- Informations système
+  - OS
+    - Connaitre la distribution Linux et sa version
+  - CPU
+    - Info sur le nombre de cpu logique \(solaris\)
+  - Swap
+  - File System
+    - Gestion de la taille disque sur une VM
+  - User
+  - Port
+  - Réseau
+  - Cle ssh
+- Les commandes unix
+  - find
+  - tar
+  - sed
+  - nohup
+  - scp | lftp
+  - md5 | checksum | digest
+  - ssh
+  - openssl \(création de certificats\)
+- Tips
+- Liens utiles
 
 <!-- /MarkdownTOC -->
 
@@ -29,13 +33,27 @@
 
 ### OS
 
-#### Connaitre la distribution Linux et sa version 
+#### Connaitre la distribution Linux et sa version
+
 ```bash
 [root@machine-01 ~]# cat /etc/redhat-release
 Red Hat Enterprise Linux Server release 5.11 (Tikanga)
+
+[root@machine-01 ~]# hostnamectl
+   Static hostname: localhost.localdomain
+Transient hostname: machine-01
+         Icon name: computer-vm
+           Chassis: vm
+        Machine ID: xxxxx
+           Boot ID: xxxx
+    Virtualization: vmware
+  Operating System: CentOS Linux 7 (Core)
+       CPE OS Name: cpe:/o:centos:centos:7
+            Kernel: Linux 3.10.0-229.el7.x86_64
+      Architecture: x86_64
 ```
 
-```ksh 
+```ksh
 #!/bin/ksh
 # ndd (Solaris)
 for var in $(/usr/sbin/ndd /dev/tcp \? | awk '{print $1}'| grep -v obsolete );do
@@ -45,7 +63,7 @@ for var in $(/usr/sbin/ndd /dev/tcp \? | awk '{print $1}'| grep -v obsolete );do
 done
 
 # prtdiag (Solaris)
-/usr/platform/sun4u/sbin/prtdiag -v 
+/usr/platform/sun4u/sbin/prtdiag -v
 
 # /etc/release (Solaris)
 more /etc/release
@@ -58,24 +76,25 @@ more /etc/release
 64-bit sparcv9 kernel modules
 ```
 
-### CPU 
+### CPU
 
-> Sous Solaris la conso ne dépasse pas les 100% c.a.d nb cpu * consommation max = 100%
-> 
-> Sous Unix la conso max est de 100% par CPU. Ce qui fait que la conso d'un process peux être à 200%
- 
+- Sous Solaris la conso ne dépasse pas les 100% c.a.d nb cpu * consommation max = 100%
+- Sous Unix la conso max est de 100% par CPU. Ce qui fait que la conso d'un process peux être à 200%
+
 #### Info sur le nombre de cpu logique (solaris)
+
 ```bash
 kstat cpu_info
 ```
 
 ### Swap
+
 ```bash
-# La commande ps 
+# La commande ps
 swap -s
 total: 3213920k bytes allocated + 6107288k reserved = 9321208k used, 1459312k available
 
-# La commande ps 
+# La commande ps
 # rss > ram réel
 # vsz > ram adressable
 ps -aefo pid,rss,vsz,args
@@ -89,14 +108,14 @@ ps -aefo pid,rss,vsz,args
 
 ### File System
 
-```bash 
+```bash
 
 # Taille des FS
 df -kh
 
 # Taille des répertoires
 du -s *
-du -sh * 
+du -sh *
 
 # Lister les fichiers lockés par un process
 # lsof
@@ -108,20 +127,13 @@ ls -l /proc/29962/fd
 
 #### Gestion de la taille disque sur une VM
 
-**Rappels : **
+**Rappels :**
 
-* **Volume physique (PV)** : Un volume physique ou « PV » pour « physical volume » est un disque ou une partition. C'est un
-espace de stockage bien réel (autrement dit un périphérique de la forme /dev/sda2 par exemple), dont
-on va confier la gestion à LVM. 
-* **Groupe de volumes (VG)** : Un groupe de volumes ou « VG » pour « volume group » est, comme son nom l'indique, un ensemble
-de PV. On a donc un ou plusieurs PV dans un groupe de volumes. Pour utiliser LVM, il faut
-obligatoirement au moins un groupe de volumes. 
-* **Volume Logique (LV)** : Un volume logique ou « LV » pour « logical volume » est ce que nous allons utiliser au final. Un volume
-logique est un espace « quelque part dans un VG » où l'on peut mettre un système de fichiers. C'est ce
-qui remplace les partitions. On peut donc utiliser un volume logique pour /home, un autre pour la
-racine, un autre pour mettre la mémoire virtuelle, etc…
+- **Volume physique (PV)** : Un volume physique ou « PV » pour « physical volume » est un disque ou une partition. C'est un espace de stockage bien réel (autrement dit un périphérique de la forme /dev/sda2 par exemple), dont on va confier la gestion à LVM.
+- **Groupe de volumes (VG)** : Un groupe de volumes ou « VG » pour « volume group » est, comme son nom l'indique, un ensemble de PV. On a donc un ou plusieurs PV dans un groupe de volumes. Pour utiliser LVM, il faut obligatoirement au moins un groupe de volumes.
+- **Volume Logique (LV)** : Un volume logique ou « LV » pour « logical volume » est ce que nous allons utiliser au final. Un volume logique est un espace « quelque part dans un VG » où l'on peut mettre un système de fichiers. C'est ce qui remplace les partitions. On peut donc utiliser un volume logique pour /home, un autre pour la racine, un autre pour mettre la mémoire virtuelle, etc…
 
-```bash 
+```bash
 
 # Liste les disque disponible
 [root@machine01 ~]# ls /dev/sd*
@@ -153,39 +165,39 @@ racine, un autre pour mettre la mémoire virtuelle, etc…
   Allocated PE          0
 
 # Creer un groupe virtuel
-[root@machine01 ~]# vgcreate VGRoot /dev/sdc
+[root@machine01 ~]# vgcreate lvm /dev/sdc
 
 # Creer un volume logique
-# Cette commande va créer le LV test d’une taille de 10Go sur le VG nommé VGRoot.
-[root@machine01 ~]# lvcreate -L 10G -n test VGRoot
+# Cette commande va créer le LV test d’une taille de 10Go sur le VG nommé lvm.
+[root@machine01 ~]# lvcreate -L 10G -n test lvm
 
 # Lister les groupes virtuel
 [root@machine01 ~]# vgs
   VG      #PV #LV #SN Attr   VSize   VFree
-  VGRoot    2   7   0 wz--n- 159,84G 107,16G
+  lvm    2   7   0 wz--n- 159,84G 107,16G
   vg_gael   1  11   0 wz--n- 170,00G   4,00G
 
 # Ajout d'un disque physique à un groupe virtuel.
-[root@machine01 ~]# vgextend VGRoot /dev/sdc
-  Volume group "VGRoot" successfully extended
+[root@machine01 ~]# vgextend lvm /dev/sdc
+  Volume group "lvm" successfully extended
 
-# Agrandir un volume logique 
-[root@machine01 ~]# lvresize -L+100g -n /dev/mapper/VGRoot-appli
+# Agrandir un volume logique
+[root@machine01 ~]# lvresize -L+100g -n /dev/mapper/lvm-appli
   Extending logical volume appli to 109,75 GB
   Logical volume appli successfully resized
 
-# Agrandir un volume logique 
-[root@machine01 ~]# resize2fs /dev/mapper/VGRoot-appli
+# Agrandir un volume logique
+[root@machine01 ~]# resize2fs /dev/mapper/lvm-appli
 resize2fs 1.39 (29-May-2006)
-Filesystem at /dev/mapper/VGRoot-appli is mounted on /appli; on-line resizing required
-Performing an on-line resize of /dev/mapper/VGRoot-appli to 28770304 (4k) blocks.
-Le système de fichiers /dev/mapper/VGRoot-appli a maintenant une taille de 28770304 blocs.
+Filesystem at /dev/mapper/lvm-appli is mounted on /appli; on-line resizing required
+Performing an on-line resize of /dev/mapper/lvm-appli to 28770304 (4k) blocks.
+Le système de fichiers /dev/mapper/lvm-appli a maintenant une taille de 28770304 blocs.
 
 ```
 
 ### User
 
-```
+```sh
 # Récupérer les info du user
 id -a syscft
 uid=311(syscft) gid=311(cft) groups=6645(testgrp),583(testgrp1)
@@ -200,14 +212,12 @@ useradd -c "Compte Cft" -d /users/syscft -g cft -G testgrp -m -u 311 -s /usr/bin
 passwd syscft (-> test 2 fois) :
 New Password:
 Re-enter new Password:
-passwd: password successfully changed for syscft 
+passwd: password successfully changed for syscft
 ```
-
 
 ### Port
 
 ```bash
-
 # Afficher la plage des ports dynamiques
 /usr/sbin/ndd /dev/tcp tcp_smallest_anon_port tcp_largest_anon_port
 9000
@@ -218,7 +228,6 @@ for i in `ps -eaf | grep java | grep adm | cut -d ' ' -f4`; do pfiles $i | grep 
 ```
 
 ### Réseau
-
 
 ```sh
 # Modifier le fichier /etc/hosts
@@ -233,7 +242,6 @@ for i in `ps -eaf | grep java | grep adm | cut -d ' ' -f4`; do pfiles $i | grep 
 ### Cle ssh
 
 ```sh
-
 # Generer un cle ssh
 [root@machine01 ~]$ ssh-keygen -t rsa -C "your_email@youremail.com"
 Generating public/private rsa key pair.
@@ -245,7 +253,7 @@ Your public key has been saved in /home/test/.ssh/id_rsa.pub.
 The key fingerprint is:
 ac:e4:e4:e4:e4:e4:e4:e4:c6:45:14:c9:8d:7a:a1:09 your_email@youremail.com
 
-# Propager la clee ssh.
+# Propager la clee public ssh.
 
 # Copier la cle public sur le serveur remote
 [root@machine01 ~]$ scp .ssh/id_rsa.pub login@hostname:.ssh/id_rsa.pub
@@ -272,6 +280,12 @@ echo Agent pid 12730;
 [root@machine01 ~]$ ssh-add
 Enter passphrase for /home/root/.ssh/id_rsa:
 Identity added: /home/root/.ssh/id_rsa (/home/root/.ssh/id_rsa)
+
+# Propager la clee privee ssh (Attention a ne pas copier la clee privee n'importe ou).
+# copîer la clee priver dans le répertoire <home>/.ssh/
+cp /tmp/ma_clee_privee /home/mon_user/.ssh/id_rsa
+# Mettre les droits en lecture seul
+chmod 400 /home/mon_user/.ssh/id_rsa
 ```
 
 ## Les commandes unix
@@ -279,7 +293,6 @@ Identity added: /home/root/.ssh/id_rsa (/home/root/.ssh/id_rsa)
 ### find
 
 ```bash
-
 # find exec
 # Recherche tous les fichiers/dossiers CVS et les supprime
 find . -name CVS -exec rm -r {} \;
@@ -288,51 +301,41 @@ find . -name CVS -exec rm -r {} \;
 # Recherche tous les fichiers qui contiennent Metro dans leur nom et lance un grep dessus
 find . -name '*Metro*' -type f | xargs grep -v OK > Metro.log
 
-#Trouver tous les fichiers modifié avant aujourdh'ui 
-find ./ -mtime +0 -name "*.log" 
-
+#Trouver tous les fichiers modifié avant aujourdh'ui
+find ./ -mtime +0 -name "*.log"
 ```
-
 
 ### tar
 
 ```bash
-
 # Extraction de plusieurs archives
 for i in `find . -name \*.tar.gz`; do  rep_name=`echo $i | cut -d"." -f1,2`; mkdir $rep_name; tar xvzf $i -C $rep_name; done
-
 ```
 
 ### sed
 
 ```bash
-
 # Remplace tous les espaces
-sed -e 's/  */ /g' 
-
+sed -e 's/  */ /g'
 ```
 
 ### nohup
 
 ```bash
-
 # Lance un script en tache de fond
 nohup ./mon_script.sh &
-
 ```
 
 ### scp | lftp
 
 ```bash
-
-# Copie de fichier d'une machine vers une autre 
+# Copie de fichier d'une machine vers une autre
 scp mon_fichier.tar.gz root@machine2:/tmp/rep/
-
 ```
 
 ### md5 | checksum | digest
 
-```
+```sh
 # md5
 { oracle } HEAD » md5sum tool-box.md
 ed3a50830e10066681aedf127f57516d *tool-box.md
@@ -353,9 +356,63 @@ ssh -g -L 80:machine2:7060 root@machine2
 # Tester la connection dans un navigateur (vérifier le proxy) http://machine1:80/endpoint/
 ```
 
+### Openssl - création de certificats
+
+```bash
+alias@host /d/ssh
+$ openssl genrsa -des3 -passout pass:x -out server.pass.key 2048
+Generating RSA private key, 2048 bit long modulus
+.................................................................+++
+..................+++
+e is 65537 (0x10001)
+
+alias@host /d/ssh
+$ openssl rsa -passin pass:x -in server.pass.key -out server.key
+writing RSA key
+
+alias@host /d/ssh
+$ rm server.pass.key
+
+# Création du certificat avec un mdp vide
+alias@host /d/ssh
+$ openssl req -new -key server.key -out server.csr
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:Country
+State or Province Name (full name) [Some-State]:State
+Locality Name (eg, city) []:Locality
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:Organization Name
+Organizational Unit Name (eg, section) []:Organizational
+Common Name (e.g. server FQDN or YOUR name) []:Name
+Email Address []:Email
+
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:
+
+alias@host /d/ssh
+$ openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+Signature ok
+subject=/C=FR/ST=Xxxxx/L=Yyyyyy/O=132 - Tertiaire/OU=Zzzzz/CN=Wwwww/emailAddress=xxxx.xxxx@xxxxxx.com
+Getting Private key
+
+alias@host /d/ssh
+$ rm server.csr
+
+# Télécharger un certificat depuis un serveur web
+[alias@host ~]$ echo -n | openssl s_client -connect hostname:port | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/serveur.cert
+
+```
+
 ## Tips
 
-**Récupérer les sorties standarts de plusieurs commandes**
+### Récupérer les sorties standarts de plusieurs commandes
 
 ```bash
 $ false | true
@@ -363,19 +420,34 @@ $ echo "${PIPESTATUS[0]} ${PIPESTATUS[1]}"
 1 0
 ```
 
-**Trouver une classe dans une liste de jar**
+### Définir une valeur par defaut pour une variable
+
+```bash
+LOG_LEVEL=${LOG_LEVEL:-"INFO"}
+```
+
+### Vérifier si une variable est définie
+
+Se mécanisme se base sur l expansion des paramètres. Ici si le paramètre est déclaré, on retrourne x sinon la chaîne de caractères vide.
+
+```bash
+$ if [ -z ${JAVA_HOME+x} ]; then echo "JAVA_HOME is unset"; else echo "JAVA_HOME is set to '$JAVA_HOME'"; fi
+var is set to 'D:\tools\java\jdk1.8.0_25'
+```
+
+### Trouver une classe dans une liste de jar
 
 ```bash
 for i in `find . -name \*.jar`; do jar tvf $i|grep -qi <MA_CLASSE> && echo $i ; done
 ```
 
-**Lister les serialUID des jar**
+### Lister les serialUID des jar
 
 ```bash
 for i in `find . -name \*.jar`; do echo "Jar : $i"; for j in `jar tf $i | grep class | cut -d"." -f1 | sed -e 's/\//./g'` ; do serialver -classpath $i $j| grep fr ; done; done
 ```
 
-## Liens utiles
+### Liens utiles
 
-* Matrice commandes unix par OS : http://www.datadisk.co.uk/html_docs/misc/unix_commands.htm
-* Cle ssh : http://www.linux-france.org/prj/edu/archinet/systeme/ch13s03.html
+- [Matrice commandes unix par OS](http://www.datadisk.co.uk/html_docs/misc/unix_commands.htm)
+- [Cle ssh](http://www.linux-france.org/prj/edu/archinet/systeme/ch13s03.html)
