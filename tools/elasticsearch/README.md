@@ -1,12 +1,8 @@
-# Tool Box Elasticsearch
-
-<!-- MarkdownTOC depth=3 -->
+# Tool Box Elasticsearch <!-- omit in toc -->
 
 - [Procédure d'installation](#procédure-dinstallation)
 - [Administration](#administration)
 - [Installation d'un plugin](#installation-dun-plugin)
-
-<!-- /MarkdownTOC -->
 
 ## Procédure d'installation
 
@@ -34,6 +30,8 @@ cd /appli/tools/elasticsearch
 bin/elasticsearch -d
 ```
 
+En cas de problème pour accéder à Elasticsearch depuis une machine distante. Il faut éditer le fichier de configuration et ajouter la propriété network.host avec la valeur *_non_loopback_*. [Pour plus d'informations](https://www.elastic.co/blog/elasticsearch-unplugged)
+
 **Arrêter ES :**
 
 ```sh
@@ -49,10 +47,9 @@ kill -9
 export JAVA_HOME=/appli/tools/jdk/
 
 cd /appli/tools/elasticsearch
-/appli/gessica/retro_doc/tools/elasticsearch/bin/plugin install lmenezes/elasticsearch-kopf/v2.0.0
+/appli/xxxxx/retro_doc/tools/elasticsearch/bin/plugin install lmenezes/elasticsearch-kopf/v2.0.0
 
-# TODO vérifier la conf 
-# En cas de proxy : 
-/appli/gessica/retro_doc/tools/elasticsearch/bin/plugin install lmenezes/elasticsearch-kopf/v2.0.0 -Dhttp.proxyHost=hostname -Dhttp.proxyPort=8080
+# TODO vérifier la conf
+# En cas de proxy :
+/appli/xxxx/retro_doc/tools/elasticsearch/bin/plugin install lmenezes/elasticsearch-kopf/v2.0.0 -Dhttp.proxyHost=hostname -Dhttp.proxyPort=8080
 ```
-
