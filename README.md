@@ -1,14 +1,17 @@
 # Documentation
 
-<!-- MarkdownTOC depth=3 autolink=true bracket=round -->
-
+- [Java](java/README.md)
+- [Spring](java/spring/README.md)
+- [Shell](shell/README.md)
 - [Git](git/README.md)
 - [Oracle](oracle/README.md)
-- [Shell](shell/README.md)
+- [Postgresql](postgresql/README.md)
 - [Workstation](workstation/README.md)
+- [Ansible AWX](tools/ansible/awx/README.md)
 - [Rundeck](tools/rundeck/README.md)
 - [Logstash](tools/logstash/README.md)
 - [Elasticsearch](tools/elasticsearch/README.md)
 - [Nexus](tools/sonatype-nexus/README.md)
-
-<!-- /MarkdownTOC -->
+- [Byteman](tools/byteman/README.md)
+- [Squid](tools/squid/README.md)
+- [Vagrant](tools/vagrant/README.md)
