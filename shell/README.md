@@ -1,33 +1,31 @@
 
-# Tool Box Unix
+# Tool Box Unix <!-- omit in toc -->
 
-<!-- MarkdownTOC depth=3 -->
-
-- Informations système
-  - OS
-    - Connaitre la distribution Linux et sa version
-  - CPU
-    - Info sur le nombre de cpu logique \(solaris\)
-  - Swap
-  - File System
-    - Gestion de la taille disque sur une VM
-  - User
-  - Port
-  - Réseau
-  - Cle ssh
-- Les commandes unix
-  - find
-  - tar
-  - sed
-  - nohup
-  - scp | lftp
-  - md5 | checksum | digest
-  - ssh
-  - openssl \(création de certificats\)
-- Tips
-- Liens utiles
-
-<!-- /MarkdownTOC -->
+- [Informations système](#informations-système)
+  - [OS](#os)
+  - [CPU](#cpu)
+  - [Swap](#swap)
+  - [File System](#file-system)
+  - [User](#user)
+  - [Port](#port)
+  - [Réseau](#réseau)
+  - [Cle ssh](#cle-ssh)
+- [Les commandes unix](#les-commandes-unix)
+  - [find](#find)
+  - [tar](#tar)
+  - [sed](#sed)
+  - [nohup](#nohup)
+  - [scp | lftp](#scp--lftp)
+  - [md5 | checksum | digest](#md5--checksum--digest)
+  - [ssh](#ssh)
+  - [Openssl - création de certificats](#openssl---création-de-certificats)
+- [Tips](#tips)
+  - [Récupérer les sorties standarts de plusieurs commandes](#récupérer-les-sorties-standarts-de-plusieurs-commandes)
+  - [Définir une valeur par defaut pour une variable](#définir-une-valeur-par-defaut-pour-une-variable)
+  - [Vérifier si une variable est définie](#vérifier-si-une-variable-est-définie)
+  - [Trouver une classe dans une liste de jar](#trouver-une-classe-dans-une-liste-de-jar)
+  - [Lister les serialUID des jar](#lister-les-serialuid-des-jar)
+  - [Liens utiles](#liens-utiles)
 
 ## Informations système
 
