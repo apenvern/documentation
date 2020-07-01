@@ -1,12 +1,11 @@
 
-# Tool Box Sonatype Nexus
+# Tool Box Sonatype Nexus <!-- omit in toc -->
 
 <!-- MarkdownTOC depth=3 -->
 
 - [Procédure d'installation](#procédure-dinstallation)
 - [Administration](#administration)
-- [Erreurs courantes](#erreurs-courantes)
-    - [La version de la Jdk n'est pas correcte](#la-version-de-la-jdk-nest-pas-correcte)
+- [Configuration de Maven](#configuration-de-maven)
 - [Nexus Core API REST API](#nexus-core-api-rest-api)
 
 <!-- /MarkdownTOC -->
@@ -25,7 +24,7 @@ tar xvzf /tmp/nexus-2.11.4-01-bundle.tar.gz nexus-2.11.4-01
 ln -s nexus-2.11.4-01/ nexus
 ```
 
-**Configuration de Nexus**
+**Configuration de Nexus :**
 
 ```sh
 # Création du repo Nexus (répertoire ou seront stockées toutes les librairies)
@@ -34,7 +33,7 @@ ln -s nexus-2.11.4-01/ nexus
 nexus-work=/appli/pic/workspaces/nexus-repo
 ```
 
-## Administration 
+## Administration
 
 **Démarrer le Nexus :**
 
@@ -43,7 +42,6 @@ cd /appli/pic/tools/nexus/bin
 ./nexus start
 ```
 
-
 **Arrêter le Nexus :**
 
 ```sh
@@ -51,28 +49,54 @@ cd /appli/pic/tools/nexus/bin
 ./nexus stop
 ```
 
+## Configuration de Maven
 
-## Erreurs courantes
+```xml
+<!-- Configuration setting.xml -->
+<servers>
+<server>
+   <id>nexus.releases</id>
+   <username>username</username>
+   <password>password</password>
+</server>
+<server>
+   <id>nexus.snapshots</id>
+   <username>username</username>
+   <password>password</password>
+</server>
+</servers>
 
-### La version de la Jdk n'est pas correcte
+<mirrors>
+<mirror>
+   <id>mirror.release</id>
+   <url>http://host:port/content/groups/public/</url>
+   <mirrorOf>external:*</mirrorOf>
+</mirror>
+<mirror>
+   <id>mirror.snapshots</id>
+   <url>http://host:port/content/repositories/snapshots/</url>
+   <mirrorOf>snapshots</mirrorOf>
+</mirror>
+</mirrors>
 
-A l'heure actuelle Nexus nécessite une Jdk 1.7 minimum (cf : https://books.sonatype.com/nexus-book/reference/prerequisites.html)
-
-Pour forcer une Jdk différente de celle dans le path par défaut il faut mettre à jour le fichier : **/appli/pic/tools/nexus/bin/jsw/conf/wrapper.conf**
-
-* Ajouter la clé ci-dessous : 
+<!-- Configuration Pom -->
+<distributionManagement>
+   <snapshotRepository>
+      <id>nexus.snapshots</id>
+      <name>Nexus snapshots repository</name>
+      <url>http://host:port/content/repositories/snapshots/</url>
+   </snapshotRepository>
+   <repository>
+      <id>nexus.releases</id>
+      <name>Nexus relases repository</name>
+      <url>http://host:port/content/repositories/releases/</url>
+   </repository>
+</distributionManagement>
 ```
-set.JAVA_HOME=/opt/jdk1.8.0_40/
-```
-* Mettre à jour la clé ci-dessous : 
-```
-wrapper.java.command=%JAVA_HOME%/bin/java
-```
-
 
 ## Nexus Core API REST API
 
-Exemple d'appel en sh à l'API du Nexus : 
+Exemple d'appel en sh à l'API du Nexus :
 
 ```sh
 
@@ -80,9 +104,8 @@ Exemple d'appel en sh à l'API du Nexus :
 curl -s -X GET -u admin:admin123 "http://localhost:8081/nexus/service/local/lucene/search?g=fr.test"
 
 # Télécharger depuis le Nexus une lib
-wget -q --user=admin --password=admin123 "http://localhost:8081/nexus/service/local/artifact/maven/content?g=fr.test&a=test-api&v=LATEST&r=releases&e=jar" -O /tmp/test-api-LASTEST.jar 
+wget -q --user=admin --password=admin123 "http://localhost:8081/nexus/service/local/artifact/maven/content?g=fr.test&a=test-api&v=LATEST&r=releases&e=jar" -O /tmp/test-api-LASTEST.jar
 
 # Upload sur le nexus une librairie
 curl -v -F r=releases -F hasPom=false -F e=jai -F g=fr.test -F a=test-api -F v=1.0 -F p=zip -F file=@test-api-1.0.zip -u admin:admin123 http://localhost:8081/nexus/service/local/artifact/maven/content
-
 ```
