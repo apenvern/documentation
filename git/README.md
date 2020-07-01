@@ -35,4 +35,17 @@ git stash pop
 git add <les fichiers que l on ne veut pas stasher>
 git stash --keep-index
 
+# Revert sur le dernier commit 
+git reset --soft HEAD~
+
+# Path
+# créer un path sur le dernier commit local
+git format-patch HEAD~1
+
+# Ajout d'un fichier .gitkeep dans un repertoire vide
+find . -type d -empty -not -path "./.git/*" -exec touch {}/.gitkeep \;
+
+# Surpprimer les fichier untrack 
+git clean -f -d
+
 ```
