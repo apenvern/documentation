@@ -1,9 +1,57 @@
 # Vagrant <!-- omit in toc -->
 
+- [Vagrant Configuration](#vagrant-configuration)
+  - [SSL](#ssl)
+  - [Proxy](#proxy)
+  - [Commande](#commande)
 - [Vagrant Private Repository](#vagrant-private-repository)
   - [Requirement](#requirement)
   - [Installation](#installation)
   - [Add new Box](#add-new-box)
+
+## Vagrant Configuration
+
+### SSL
+
+Ajouter les certificats SSL dans <vagrant_install_dir>\embedded\cacert.pem
+
+### Proxy
+
+Envirronement configuration
+
+```dos
+set VAGRANT_HOME=<user_home>\.vagrant.d
+set http_proxy=http://xxxx.proxy.corp:8080
+set https_proxy=http://xxxx.proxy.corp:8080
+```
+
+Installer le plugin vagrant-proxyconf
+
+```dos
+vagrant plugin install vagrant-proxyconf vagrant-hosts vagrant-vbguest
+```
+
+Mettre à joutr le fichier de configuration <user_home>\vagrant.d\Vagrantfile
+
+```dos
+Vagrant.configure("2") do |config|
+    if Vagrant.has_plugin?("vagrant-proxyconf")
+        config.proxy.http     = "http://xxxx.proxy.corp:8080"
+        config.proxy.https    = "http://xxxx.proxy.corp:8080"
+        config.proxy.no_proxy = "localhost,127.0.0.1,.xxx.corp"
+        config.proxy.enabled = { npm: false }
+    end
+end
+```
+
+### Commande
+
+Port forwarding Guest to Host
+
+```dos
+vagrant ssh -- -R guestport:host:hostport
+vagrant ssh -- -R 8091:localhost:8091
+```
 
 ## Vagrant Private Repository
 
